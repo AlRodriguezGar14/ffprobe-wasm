@@ -10,4 +10,5 @@ dist/ffprobe-wasm.js:
 	-lavcodec -lavformat -lavfilter -lavdevice -lswresample -lswscale -lavutil -lm \
 	-lworkerfs.js \
 	-o dist/ffprobe-wasm.js \
-	src/ffprobe-wasm-wrapper.cpp
+	src/ffprobe-wasm-wrapper.cpp && \
+	cp src/ffprobe-wasm.d.ts dist/ffprobe-wasm.d.ts

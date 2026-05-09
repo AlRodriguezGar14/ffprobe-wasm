@@ -61,6 +61,7 @@ RUN cd /tmp/ffmpeg-${FFMPEG_VERSION} && \
 
 
 COPY ./src/ffprobe-wasm-wrapper.cpp /build/src/ffprobe-wasm-wrapper.cpp
+COPY ./src/ffprobe-wasm.d.ts /build/src/ffprobe-wasm.d.ts
 COPY ./Makefile /build/Makefile
 
 WORKDIR /build
