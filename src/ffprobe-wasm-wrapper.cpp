@@ -552,15 +552,15 @@ EMSCRIPTEN_BINDINGS(structs) {
   register_vector<Chapter>("Chapter");
 
   emscripten::value_object<FileInfoResponse>("FileInfoResponse")
-  .field("name", &FileInfoResponse::name)
-  .field("duration", &FileInfoResponse::duration)
-  .field("bit_rate", &FileInfoResponse::bit_rate)
-  .field("url", &FileInfoResponse::url)
-  .field("nb_streams", &FileInfoResponse::nb_streams)
-  .field("flags", &FileInfoResponse::flags)
-  .field("streams", &FileInfoResponse::streams)
-  .field("nb_chapters", &FileInfoResponse::nb_chapters)
-  .field("chapters", &FileInfoResponse::chapters)
+      .field("name", &FileInfoResponse::name)
+      .field("duration", &FileInfoResponse::duration)
+      .field("bit_rate", &FileInfoResponse::bit_rate)
+      .field("url", &FileInfoResponse::url)
+      .field("nb_streams", &FileInfoResponse::nb_streams)
+      .field("flags", &FileInfoResponse::flags)
+      .field("streams", &FileInfoResponse::streams)
+      .field("nb_chapters", &FileInfoResponse::nb_chapters)
+      .field("chapters", &FileInfoResponse::chapters)
       .field("error", &FileInfoResponse::error);
   function("get_file_info", &get_file_info);
 }
