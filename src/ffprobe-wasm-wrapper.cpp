@@ -156,30 +156,6 @@ static std::string snap_aspect_label(int width, int height) {
   return std::string();
 }
 
-static void fill_coded_dimensions(int *coded_width, int *coded_height,
-                                  const AVStream *stream) {
-  *coded_width = 0;
-  *coded_height = 0;
-  const AVCodecParameters *codecpar = stream->codecpar;
-  if (codecpar->codec_type != AVMEDIA_TYPE_VIDEO)
-    return;
-
-  const AVCodec *decoder = avcodec_find_decoder(codecpar->codec_id);
-  if (!decoder)
-    return;
-
-  AVCodecContext *ctx = avcodec_alloc_context3(decoder);
-  if (!ctx)
-    return;
-
-  if (avcodec_parameters_to_context(ctx, codecpar) >= 0 &&
-      avcodec_open2(ctx, decoder, NULL) >= 0) {
-    *coded_width = ctx->coded_width > 0 ? ctx->coded_width : ctx->width;
-    *coded_height = ctx->coded_height > 0 ? ctx->coded_height : ctx->height;
-  }
-  avcodec_free_context(&ctx);
-}
-
 typedef struct Stream {
   int index;
   int id;
@@ -197,8 +173,6 @@ typedef struct Stream {
   int sample_rate;
   int frame_size;
   std::vector<Tag> tags;
-  int coded_width;
-  int coded_height;
   int has_b_frames;
   std::string sample_aspect_ratio;
   ProbeRational sample_aspect_ratio_rational;
@@ -222,13 +196,13 @@ typedef struct Stream {
   ProbeRational avg_frame_rate_rational;
   std::string time_base;
   ProbeRational time_base_rational;
-  int64_t start_pts;
+  double start_pts;
   double start_time;
-  int64_t duration_ts;
+  double duration_ts;
   double duration;
-  int64_t bit_rate;
+  double bit_rate;
   int bits_per_raw_sample;
-  int64_t nb_frames;
+  double nb_frames;
   int extradata_size;
   Disposition disposition;
 } Stream;
@@ -356,7 +330,6 @@ FileInfoResponse get_file_info(std::string filename) {
     stream.sample_rate = (int)pLocalCodecParameters->sample_rate;
     stream.frame_size = (int)pLocalCodecParameters->frame_size;
 
-    fill_coded_dimensions(&stream.coded_width, &stream.coded_height, pStream);
     stream.has_b_frames = pLocalCodecParameters->video_delay;
     stream.sample_aspect_ratio_rational =
         make_rational(pStream->sample_aspect_ratio);
@@ -394,13 +367,13 @@ FileInfoResponse get_file_info(std::string filename) {
     stream.time_base_rational = make_rational(pStream->time_base);
     stream.time_base =
         rational_to_string(pStream->time_base.num, pStream->time_base.den, '/');
-    stream.start_pts = pStream->start_time;
+    stream.start_pts = (double)pStream->start_time;
     stream.start_time = ts_seconds(pStream->start_time, pStream->time_base);
-    stream.duration_ts = pStream->duration;
+    stream.duration_ts = (double)pStream->duration;
     stream.duration = ts_seconds(pStream->duration, pStream->time_base);
-    stream.bit_rate = pLocalCodecParameters->bit_rate;
+    stream.bit_rate = (double)pLocalCodecParameters->bit_rate;
     stream.bits_per_raw_sample = pLocalCodecParameters->bits_per_raw_sample;
-    stream.nb_frames = pStream->nb_frames;
+    stream.nb_frames = (double)pStream->nb_frames;
     stream.extradata_size = pLocalCodecParameters->extradata_size;
     stream.disposition = fill_disposition(pStream->disposition);
 
@@ -504,8 +477,6 @@ EMSCRIPTEN_BINDINGS(structs) {
       .field("level", &Stream::level)
       .field("width", &Stream::width)
       .field("height", &Stream::height)
-      .field("coded_width", &Stream::coded_width)
-      .field("coded_height", &Stream::coded_height)
       .field("has_b_frames", &Stream::has_b_frames)
       .field("sample_aspect_ratio", &Stream::sample_aspect_ratio)
       .field("sample_aspect_ratio_rational",

@@ -49,8 +49,6 @@ export interface Stream {
   level: number
   width: number
   height: number
-  coded_width: number
-  coded_height: number
   has_b_frames: number
   sample_aspect_ratio: string
   sample_aspect_ratio_rational: ProbeRational
