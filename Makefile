@@ -6,6 +6,7 @@ dist/ffprobe-wasm.js:
 	-I/opt/ffmpeg/include/ \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS="[FS, cwrap, ccall, getValue, setValue, writeAsciiToMemory]" \
 	-s INITIAL_MEMORY=268435456 \
+	-s WASM_BIGINT \
 	-lavcodec -lavformat -lavfilter -lavdevice -lswresample -lswscale -lavutil -lm \
 	-lworkerfs.js \
 	-o dist/ffprobe-wasm.js \
