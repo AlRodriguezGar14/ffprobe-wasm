@@ -402,7 +402,7 @@ FileInfoResponse get_file_info(std::string filename) {
     stream.bits_per_raw_sample = pLocalCodecParameters->bits_per_raw_sample;
     stream.nb_frames = pStream->nb_frames;
     stream.extradata_size = pLocalCodecParameters->extradata_size;
-    // stream.disposition = fill_disposition(pStream->disposition);
+    stream.disposition = fill_disposition(pStream->disposition);
 
     // Add tags to stream.
     const AVDictionaryEntry *tag = NULL;
