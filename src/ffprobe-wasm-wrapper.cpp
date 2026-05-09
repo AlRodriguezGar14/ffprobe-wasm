@@ -1,7 +1,6 @@
 #include <cmath>
 #include <emscripten.h>
 #include <emscripten/bind.h>
-#include <iomanip>
 #include <inttypes.h>
 #include <iomanip>
 #include <sstream>
@@ -40,6 +39,27 @@ typedef struct ProbeRational {
   int num;
   int den;
 } ProbeRational;
+
+typedef struct Disposition {
+  int default_flag;
+  int dub;
+  int original;
+  int comment;
+  int lyrics;
+  int karaoke;
+  int forced;
+  int hearing_impaired;
+  int visual_impaired;
+  int clean_effects;
+  int attached_pic;
+  int timed_thumbnails;
+  int captions;
+  int descriptions;
+  int metadata;
+  int dependent;
+  int still_image;
+} Disposition;
+
 static ProbeRational make_rational(AVRational v) {
   ProbeRational r = {v.num, v.den};
   return r;
@@ -85,6 +105,28 @@ static std::string channel_layout_string(int channels, uint64_t layout) {
   char buf[128] = {0};
   av_get_channel_layout_string(buf, sizeof(buf), channels, layout);
   return std::string(buf);
+}
+
+static Disposition fill_disposition(int d) {
+  Disposition out = {};
+  out.default_flag = !!(d & AV_DISPOSITION_DEFAULT);
+  out.dub = !!(d & AV_DISPOSITION_DUB);
+  out.original = !!(d & AV_DISPOSITION_ORIGINAL);
+  out.comment = !!(d & AV_DISPOSITION_COMMENT);
+  out.lyrics = !!(d & AV_DISPOSITION_LYRICS);
+  out.karaoke = !!(d & AV_DISPOSITION_KARAOKE);
+  out.forced = !!(d & AV_DISPOSITION_FORCED);
+  out.hearing_impaired = !!(d & AV_DISPOSITION_HEARING_IMPAIRED);
+  out.visual_impaired = !!(d & AV_DISPOSITION_VISUAL_IMPAIRED);
+  out.clean_effects = !!(d & AV_DISPOSITION_CLEAN_EFFECTS);
+  out.attached_pic = !!(d & AV_DISPOSITION_ATTACHED_PIC);
+  out.timed_thumbnails = !!(d & AV_DISPOSITION_TIMED_THUMBNAILS);
+  out.captions = !!(d & AV_DISPOSITION_CAPTIONS);
+  out.descriptions = !!(d & AV_DISPOSITION_DESCRIPTIONS);
+  out.metadata = !!(d & AV_DISPOSITION_METADATA);
+  out.dependent = !!(d & AV_DISPOSITION_DEPENDENT);
+  out.still_image = !!(d & AV_DISPOSITION_STILL_IMAGE);
+  return out;
 }
 
 static std::string snap_aspect_label(int width, int height) {
@@ -188,6 +230,7 @@ typedef struct Stream {
   int bits_per_raw_sample;
   int64_t nb_frames;
   int extradata_size;
+  Disposition disposition;
 } Stream;
 
 typedef struct Chapter {
@@ -426,6 +469,25 @@ EMSCRIPTEN_BINDINGS(structs) {
       .field("num", &ProbeRational::num)
       .field("den", &ProbeRational::den);
 
+  emscripten::value_object<Disposition>("Disposition")
+      .field("default_flag", &Disposition::default_flag)
+      .field("dub", &Disposition::dub)
+      .field("original", &Disposition::original)
+      .field("comment", &Disposition::comment)
+      .field("lyrics", &Disposition::lyrics)
+      .field("karaoke", &Disposition::karaoke)
+      .field("forced", &Disposition::forced)
+      .field("hearing_impaired", &Disposition::hearing_impaired)
+      .field("visual_impaired", &Disposition::visual_impaired)
+      .field("clean_effects", &Disposition::clean_effects)
+      .field("attached_pic", &Disposition::attached_pic)
+      .field("timed_thumbnails", &Disposition::timed_thumbnails)
+      .field("captions", &Disposition::captions)
+      .field("descriptions", &Disposition::descriptions)
+      .field("metadata", &Disposition::metadata)
+      .field("dependent", &Disposition::dependent)
+      .field("still_image", &Disposition::still_image);
+
   emscripten::value_object<Stream>("Stream")
       .field("index", &Stream::index)
       .field("id", &Stream::id)
@@ -477,6 +539,7 @@ EMSCRIPTEN_BINDINGS(structs) {
       .field("bits_per_raw_sample", &Stream::bits_per_raw_sample)
       .field("nb_frames", &Stream::nb_frames)
       .field("extradata_size", &Stream::extradata_size)
+      .field("disposition", &Stream::disposition)
       .field("tags", &Stream::tags);
   register_vector<Stream>("Stream");
 
