@@ -43,7 +43,6 @@ export interface Stream {
   codec_long_name: string
   codec_tag_string: string
   codec_tag: string
-  format: string
   bit_rate: number
   profile: string
   level: number

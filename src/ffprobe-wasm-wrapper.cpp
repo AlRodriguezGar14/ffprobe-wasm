@@ -164,7 +164,6 @@ typedef struct Stream {
   std::string codec_long_name;
   std::string codec_tag_string;
   std::string codec_tag;
-  std::string format;
   std::string profile;
   int level;
   int width;
@@ -318,7 +317,6 @@ FileInfoResponse get_file_info(std::string filename) {
           << (uint32_t)pLocalCodecParameters->codec_tag;
       stream.codec_tag = oss.str();
     }
-    stream.format = str_or_empty(pix_fmt_name);
     stream.profile = str_or_empty(avcodec_profile_name(
         pLocalCodecParameters->codec_id, pLocalCodecParameters->profile));
     stream.level = (int)pLocalCodecParameters->level;
@@ -472,7 +470,6 @@ EMSCRIPTEN_BINDINGS(structs) {
       .field("codec_long_name", &Stream::codec_long_name)
       .field("codec_tag_string", &Stream::codec_tag_string)
       .field("codec_tag", &Stream::codec_tag)
-      .field("format", &Stream::format)
       .field("bit_rate", &Stream::bit_rate)
       .field("profile", &Stream::profile)
       .field("level", &Stream::level)
