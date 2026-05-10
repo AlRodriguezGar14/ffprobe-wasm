@@ -1,4 +1,8 @@
-export interface EmbindVector<T> {
+export interface EmbindObject {
+  delete(): void
+}
+
+export interface EmbindVector<T> extends EmbindObject {
   size(): number
   get(index: number): T
 }
@@ -14,23 +18,23 @@ export interface ProbeRational {
 }
 
 export interface Disposition {
-  default_flag: number
-  dub: number
-  original: number
-  comment: number
-  lyrics: number
-  karaoke: number
-  forced: number
-  hearing_impaired: number
-  visual_impaired: number
-  clean_effects: number
-  attached_pic: number
-  timed_thumbnails: number
-  captions: number
-  descriptions: number
-  metadata: number
-  dependent: number
-  still_image: number
+  default: 0 | 1
+  dub: 0 | 1
+  original: 0 | 1
+  comment: 0 | 1
+  lyrics: 0 | 1
+  karaoke: 0 | 1
+  forced: 0 | 1
+  hearing_impaired: 0 | 1
+  visual_impaired: 0 | 1
+  clean_effects: 0 | 1
+  attached_pic: 0 | 1
+  timed_thumbnails: 0 | 1
+  captions: 0 | 1
+  descriptions: 0 | 1
+  metadata: 0 | 1
+  dependent: 0 | 1
+  still_image: 0 | 1
 }
 
 export interface Stream {
@@ -91,7 +95,7 @@ export interface Chapter {
   tags: EmbindVector<Tag>
 }
 
-export interface FileInfoResponse {
+export interface FileInfoResponse extends EmbindObject {
   name: string
   duration: number
   bit_rate: number
