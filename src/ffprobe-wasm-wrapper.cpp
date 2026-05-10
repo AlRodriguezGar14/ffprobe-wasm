@@ -91,7 +91,7 @@ static const char *field_order_name(enum AVFieldOrder fo) {
   case AV_FIELD_BT:
     return "bt";
   default:
-    return NULL;
+    return "unknown";
   }
 }
 
