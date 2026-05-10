@@ -285,6 +285,7 @@ FileInfoResponse get_file_info(std::string filename) {
                   (AVSampleFormat)pLocalCodecParameters->format)
             : NULL;
 
+    static const int DAR_MAX = 1024 * 1024;
     AVRational dar = {0, 1};
     if (pLocalCodecParameters->width > 0 && pLocalCodecParameters->height > 0) {
       AVRational sar = pStream->sample_aspect_ratio;
@@ -295,7 +296,7 @@ FileInfoResponse get_file_info(std::string filename) {
       // Compute Display Aspect Ratio
       av_reduce(&dar.num, &dar.den,
                 (int64_t)pLocalCodecParameters->width * sar.num,
-                (int64_t)pLocalCodecParameters->height * sar.den, 1024 * 1024);
+                (int64_t)pLocalCodecParameters->height * sar.den, DAR_MAX);
     }
 
     Stream stream = {};
@@ -303,10 +304,7 @@ FileInfoResponse get_file_info(std::string filename) {
     stream.id = (int)pStream->id;
     stream.codec_type = str_or_empty(
         av_get_media_type_string(pLocalCodecParameters->codec_type));
-    stream.codec_name = str_or_empty(
-        avcodec_descriptor_get(pLocalCodecParameters->codec_id)
-            ? avcodec_descriptor_get(pLocalCodecParameters->codec_id)->name
-            : NULL);
+    stream.codec_name = str_or_empty(descriptor ? descriptor->name : NULL);
     stream.codec_long_name =
         str_or_empty(descriptor ? descriptor->long_name : NULL);
     {
@@ -367,13 +365,16 @@ FileInfoResponse get_file_info(std::string filename) {
     stream.time_base_rational = make_rational(pStream->time_base);
     stream.time_base =
         rational_to_string(pStream->time_base.num, pStream->time_base.den, '/');
-    stream.start_pts = (double)pStream->start_time;
+    stream.start_pts = (pStream->start_time == AV_NOPTS_VALUE)
+                           ? NAN
+                           : (double)pStream->start_time;
     stream.start_time = ts_seconds(pStream->start_time, pStream->time_base);
-    stream.duration_ts = (double)pStream->duration;
+    stream.duration_ts =
+        (pStream->duration == AV_NOPTS_VALUE) ? NAN : (double)pStream->duration;
     stream.duration = ts_seconds(pStream->duration, pStream->time_base);
     stream.bit_rate = (double)pLocalCodecParameters->bit_rate;
     stream.bits_per_raw_sample = pLocalCodecParameters->bits_per_raw_sample;
-    stream.nb_frames = (double)pStream->nb_frames;
+    stream.nb_frames = (pStream->nb_frames > 0) ? (double)pStream->nb_frames : NAN;
     stream.extradata_size = pLocalCodecParameters->extradata_size;
     stream.disposition = fill_disposition(pStream->disposition);
 
@@ -443,7 +444,7 @@ EMSCRIPTEN_BINDINGS(structs) {
       .field("den", &ProbeRational::den);
 
   emscripten::value_object<Disposition>("Disposition")
-      .field("default_flag", &Disposition::default_flag)
+      .field("default", &Disposition::default_flag)
       .field("dub", &Disposition::dub)
       .field("original", &Disposition::original)
       .field("comment", &Disposition::comment)
