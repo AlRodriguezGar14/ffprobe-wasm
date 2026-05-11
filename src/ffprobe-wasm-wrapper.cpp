@@ -286,8 +286,8 @@ FileInfoResponse get_file_info(std::string filename) {
 
     static const int DAR_MAX = 1024 * 1024;
     AVRational dar = {0, 1};
+    AVRational sar = pStream->sample_aspect_ratio;
     if (pLocalCodecParameters->width > 0 && pLocalCodecParameters->height > 0) {
-      AVRational sar = pStream->sample_aspect_ratio;
       if (sar.num <= 0 || sar.den <= 0) {
         sar.num = 1;
         sar.den = 1;
@@ -328,8 +328,7 @@ FileInfoResponse get_file_info(std::string filename) {
 
     stream.has_b_frames = pLocalCodecParameters->video_delay;
     stream.sample_aspect_ratio_rational = make_rational(sar);
-    stream.sample_aspect_ratio =
-        rational_to_string(sar.num, sar.den, ':');
+    stream.sample_aspect_ratio = rational_to_string(sar.num, sar.den, ':');
     stream.display_aspect_ratio_rational = make_rational(dar);
     stream.display_aspect_ratio = rational_to_string(dar.num, dar.den, ':');
     stream.display_aspect_ratio_label = snap_aspect_label(dar.num, dar.den);
@@ -370,7 +369,8 @@ FileInfoResponse get_file_info(std::string filename) {
     stream.duration = ts_seconds(pStream->duration, pStream->time_base);
     stream.bit_rate = (double)pLocalCodecParameters->bit_rate;
     stream.bits_per_raw_sample = pLocalCodecParameters->bits_per_raw_sample;
-    stream.nb_frames = (pStream->nb_frames > 0) ? (double)pStream->nb_frames : NAN;
+    stream.nb_frames =
+        (pStream->nb_frames > 0) ? (double)pStream->nb_frames : NAN;
     stream.extradata_size = pLocalCodecParameters->extradata_size;
     stream.disposition = fill_disposition(pStream->disposition);
 
